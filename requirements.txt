@@ -1,7 +1,3 @@
-streamlit
-streamlit_webrtc
-av
-mediapipe
-cv2
-numpy
 opencv-python-headless
+streamlit
+streamlit-webrtc
