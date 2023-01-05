@@ -4,4 +4,4 @@ av
 mediapipe
 cv2
 numpy
-opencv-python
+opencv-python-headless
