@@ -1,2 +1,6 @@
 streamlit
-pandas
+streamlit_webrtc
+av
+mediapipe
+cv2
+numpy
