@@ -3,3 +3,4 @@ streamlit~=1.16.0
 streamlit-webrtc
 av~=9.2.0
 opencv-python~=4.7.0.68
+mediapipe
