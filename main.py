@@ -2,36 +2,44 @@ import cv2
 import numpy as np
 import av
 import mediapipe as mp
+from cvzone.HandTrackingModule import HandDetector
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(
-    model_complexity=0,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
-)
+detector = HandDetector(detectionCon=0.8, maxHands=2)
 
+offset = 50
+size = (300, 300)
+hand_features = []
+# def process(image):
+#     hands_crop, image_crop = detector.findHands(image.copy())
+#     if hands_crop:
+#         hand_crop = hands_crop[0]
+#         x, y, w, h = hand_crop['bbox']
+#         img_crop = image[y - offset: y + h + offset, x - offset: x + w + offset]
+#
+#         img_crop = cv2.resize(img_crop, size)  # Tune the image size
+#         hands, img = detector.findHands(img_crop.copy())
+#         if hands:
+#             hand = hands[0]
+#             hand_lm = hand['lmList']
+#             hand_lm = np.array(hand_lm).flatten()
+#             x, y, w, h = hand['bbox']
+#             hand_features.append(hand_lm)
+#
+#         cv2.imshow("Cropped Image", img)
+#     cv2.imshow("Original Image", image_crop)
+#     return image_crop
 
 def process(image):
-    image.flags.writeable = False
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = hands.process(image)
+    hands_crop, image_crop = detector.findHands(image)
+    if hands_crop:
+        hand_crop = hands_crop[0]
+        x, y, w, h = hand_crop['bbox']
+        img_crop = image[y - offset: y + h + offset, x - offset: x + w + offset]
 
-    # Draw the hand annotations on the image.
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    if results.multi_hand_landmarks:
-        for hand_landmarks in results.multi_hand_landmarks:
-            mp_drawing.draw_landmarks(
-                image,
-                hand_landmarks,
-                mp_hands.HAND_CONNECTIONS,
-                mp_drawing_styles.get_default_hand_landmarks_style(),
-                mp_drawing_styles.get_default_hand_connections_style())
-    return cv2.flip(image, 1)
 
+    #cv2.imshow("Original Image", image_crop)
+    return image_crop
 
 RTC_CONFIGURATION = RTCConfiguration(
     {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
