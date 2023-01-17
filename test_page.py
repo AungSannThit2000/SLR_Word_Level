@@ -49,8 +49,7 @@ def process(image):
         x, y, w, h = hand_crop['bbox']
         img_crop = image[y - offset: y + h + offset, x - offset: x + w + offset]
 
-    # cv2.imshow("Original Image", image_crop)
-    return image_crop
+    return image
 
 
 class VideoProcessor:
@@ -96,9 +95,12 @@ elif choice_s == "Video File Hand Detection":
             stvideo = st.empty()
             while vf.isOpened():
                 ret, frame = vf.read()
+
                 if not ret:
                     print("Can't receive frame (stream end?). Exiting ...")
                     break
+
                 video = process(frame)
-                stvideo.image(video)
+                image = cv.cvtColor(video, cv.COLOR_BGR2RGB)
+                stvideo.image(image)
 
