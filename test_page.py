@@ -102,5 +102,7 @@ elif choice_s == "Video File Hand Detection":
 
                 video = process(frame)
                 image = cv.cvtColor(video, cv.COLOR_BGR2RGB)
+                print(type(image))
                 stvideo.image(image)
+
 
