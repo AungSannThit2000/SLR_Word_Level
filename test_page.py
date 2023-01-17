@@ -92,10 +92,11 @@ elif choice_s == "Video File Hand Detection":
 
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(uploaded_file.read())
-
-
-
-
-            video_file = open(tfile.name, 'rb')
-            video_bytes = video_file.read()
-            st.video(video_bytes)
+            # video_file = open(tfile.name, 'rb')
+            #
+            # video_bytes = video_file.read()
+            #
+            # st.video(video_bytes)
+            vf = cv.VideoCapture(tfile.name)
+            video = process(vf.to_ndarray(format="bgr24"))
+            st.video(video)
