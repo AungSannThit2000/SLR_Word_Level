@@ -100,3 +100,23 @@ elif choice_s == "Video File Hand Detection":
                 if ret == True:
                     image = cv.resize(frame, size)  # Tune the image size
                     hands, img = detector.findHands(image.copy())
+                    if hands:
+                        hand1 = hands[0]
+                        x, y, w, h = hand1['bbox']
+                        img_crop = image[y - offset: y + h + offset,
+                                   x - offset: x + w + offset]  # Tune the offset value
+                        cv.imshow("Cropped Image", img_crop)
+                        #                     result.write(img_crop)
+
+                    cv.imshow("Image", img)
+
+                    if cv.waitKey(25) & 0xFF == ord('q'):  # Tune the waitKey value
+                        break
+                else:
+                    break
+
+                video_file = open(tfile.name, 'rb')
+                video_bytes = video_file.read()
+                st.video(video_bytes)
+                cap.release()
+                cv.destroyAllWindows()
