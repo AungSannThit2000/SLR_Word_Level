@@ -83,3 +83,16 @@ elif choice_s == "Webcam Hand Detection":
         video_processor_factory=VideoProcessor,
         async_processing=True,
     )
+
+elif choice_s == "Video File Hand Detection":
+    uploaded_files = st.file_uploader("Choose a video file.", accept_multiple_files=True)
+    for uploaded_file in uploaded_files:
+        if uploaded_file is not None:
+            # bytes_data = upload_file.getvalue()
+            # st.write(bytes_data)
+
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(uploaded_file.read())
+
+            video_file = open(tfile.name, 'rb')
+            video_bytes = video_file.read()
