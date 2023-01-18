@@ -110,3 +110,4 @@ elif choice_s == "Video File Hand Detection":
                 result.image(image)
 
 
+

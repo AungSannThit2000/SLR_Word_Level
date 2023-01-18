@@ -37,7 +37,7 @@ def add_bg_from_local(image_file):
 add_bg_from_local('bg_5hands.jpg')
 
 st.header(':gray[_Welcome to NyoKi Classifier_]')
-st.subheader('Hand Sign Recognition Application (Word Level)')
+#st.subheader('Hand Sign Recognition Application (Word Level)')
 activities = ["Home", "Webcam Hand Detection", "Video File Hand Detection", "Thanks"]
 choice_s = st.sidebar.selectbox("Select Activity <3", activities)
 
@@ -65,11 +65,41 @@ class VideoProcessor:
 if choice_s == "Home":
     html_temp_home1 = """<div style="background-color:#454545;padding:10px">
                               <h4 style="color:white;text-align:center;">
-                              Hand Sign recognition application using OpenCV, Streamlit.
+                              Hand Sign recognition application (Word Level)
                               </h4>
                               </div>
                               </br>"""
     st.markdown(html_temp_home1, unsafe_allow_html=True)
+
+    st.subheader("Why we made this project!")
+    motivation_text = """<p>In reality, everyone is not perfect and unfortunately, some are even born with disabilities. Their lives are unfair from the start of their chapter. Realizing that, we got the idea of creating an app for the deaf people so that they can equally
+     enjoy their social lives alongside everyone else around the world.</p>
+    """
+    st.markdown(motivation_text,unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.header("မင်္ဂလာပါ")
+        video_file = open('main_page_videos/vid1.mp4', 'rb')
+        video_bytes = video_file.read()
+
+        st.video(video_bytes)
+
+    with col2:
+        st.header("ဟုတ်တယ်")
+        video_file = open('main_page_videos/vid2.mp4', 'rb')
+        video_bytes = video_file.read()
+
+        st.video(video_bytes)
+
+    with col3:
+        st.header("မဟုတ်ဖူး")
+        video_file = open('main_page_videos/vid3.mp4', 'rb')
+        video_bytes = video_file.read()
+
+        st.video(video_bytes)
+
 
 elif choice_s == "Webcam Hand Detection":
     RTC_CONFIGURATION = RTCConfiguration(
