@@ -11,6 +11,9 @@ from cvzone.HandTrackingModule import HandDetector
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from glob import glob
 
+
+
+
 detector = HandDetector(detectionCon=0.8, maxHands=2)
 
 offset = 50
@@ -42,6 +45,7 @@ activities = ["Home", "Webcam Hand Detection", "Video File Hand Detection", "Tha
 choice_s = st.sidebar.selectbox("Select Activity <3", activities)
 
 
+@st.cache
 def process(image):
     hands_crop, image_crop = detector.findHands(image)
     if hands_crop:
