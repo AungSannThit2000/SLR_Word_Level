@@ -92,17 +92,17 @@ elif choice_s == "Video File Hand Detection":
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(uploaded_file.read())
             vf = cv.VideoCapture(tfile.name)
-            stvideo = st.empty()
+            result = st.empty()
             while vf.isOpened():
                 ret, frame = vf.read()
 
                 if not ret:
-                    print("Can't receive frame (stream end?). Exiting ...")
+                    #print("Can't receive frame (stream end?). Exiting ...")
+                    st.write("Can't receive frame (stream end?). Exiting ...")
                     break
 
                 video = process(frame)
                 image = cv.cvtColor(video, cv.COLOR_BGR2RGB)
-                print(type(image))
-                stvideo.image(image)
+                result.image(image)
 
 
