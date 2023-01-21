@@ -144,7 +144,7 @@ class VideoProcessor:
 
 
 if choice_s == "Home":
-    html_temp_home1 = """<div style="width:550px;height:100px;background-color:#FFFFFF;background-position:center;padding:10px">
+    html_temp_home1 = """<div style="width:550px;height:100px;background-color:#BCB6B5;background-position:center;padding:10px">
                                   <h4 style="color:black;text-align:center;">
                                   Hand Sign (word level) recognition application<br>using OpenCV, Streamlit.
                                   </h4>
