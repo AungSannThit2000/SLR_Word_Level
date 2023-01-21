@@ -111,7 +111,7 @@ def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
 
                 # Viz probabilities
                 image = prob_viz(res, words, image_detect, colors)
-           return image
+        return image
 
 colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245)]
 
