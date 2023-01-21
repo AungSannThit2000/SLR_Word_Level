@@ -61,7 +61,7 @@ model = load_model('models for streamlit/action_yangon_100acc_100val')
 def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
     with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
 
-        words = np.array(['MingalarPar', 'Mhan', 'Mharr'])
+        words = np.array(['[MingalarPar]', '[Mhan]', '[Mharr]'])
 
         img_resize = cv.resize(image, (640, 480))
         # Make detections
@@ -99,7 +99,7 @@ def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
         return image
 
 
-colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245)]
+colors = [(255,255,255), (71,240,21), (26,21,235)]
 
 def mediapipe_detection(image,hands):
     image = cv.cvtColor(image, cv.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
@@ -112,8 +112,8 @@ def mediapipe_detection(image,hands):
 def prob_viz(res, words, input_frame, colors):
     output_frame = input_frame.copy()
     for num, prob in enumerate(res):
-        cv.rectangle(output_frame, (0, 60 + num * 40), (int(prob * 100), 90 + num * 40), colors[num], -1)
-        cv.putText(output_frame, words[num], (0, 85 + num * 40), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+        cv.rectangle(output_frame, (0, 2 + num * 40), (int(prob * 155), 32 + num * 40), colors[num], -1)
+        cv.putText(output_frame, words[num], (0, 25 + num * 40), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                    cv.LINE_AA)
 
     return output_frame
