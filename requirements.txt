@@ -5,3 +5,4 @@ av~=9.2.0
 opencv-python~=4.7.0.68
 mediapipe
 cvzone
+tensorflow

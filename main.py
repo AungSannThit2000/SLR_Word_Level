@@ -72,8 +72,8 @@ if choice_s == "Home":
     st.markdown(html_temp_home1, unsafe_allow_html=True)
 
     st.subheader("Why we made this project!")
-    motivation_text = """<p>In reality, everyone is not perfect and unfortunately, some are even born with disabilities. Their lives are unfair from the start of their chapter. Realizing that, we got the idea of creating an app for the deaf people so that they can equally
-     enjoy their social lives alongside everyone else around the world.</p>
+    motivation_text = """<p><b>In reality, everyone is not perfect and unfortunately, some are even born with disabilities. Their lives are unfair from the start of their chapter. Realizing that, we got the idea of creating an app for the deaf people so that they can equally
+     enjoy their social lives alongside everyone else around the world.</b></p>
     """
     st.markdown(motivation_text,unsafe_allow_html=True)
 
@@ -87,14 +87,14 @@ if choice_s == "Home":
         st.video(video_bytes)
 
     with col2:
-        st.header("ဟုတ်တယ်")
+        st.header("မှန်တယ်")
         video_file = open('main_page_videos/vid2.mp4', 'rb')
         video_bytes = video_file.read()
 
         st.video(video_bytes)
 
     with col3:
-        st.header("မဟုတ်ဖူး")
+        st.header("မှားတယ်")
         video_file = open('main_page_videos/vid3.mp4', 'rb')
         video_bytes = video_file.read()
 
@@ -123,7 +123,16 @@ elif choice_s == "Video File Hand Detection":
 
             tfile = tempfile.NamedTemporaryFile(delete=False)
             tfile.write(uploaded_file.read())
+            vf = cv.VideoCapture(tfile.name)
+            result = st.empty()
+            while vf.isOpened():
+                ret, frame = vf.read()
 
-            video_file = open(tfile.name, 'rb')
-            video_bytes = video_file.read()
-            st.video(video_bytes)
+                if not ret:
+                    # print("Can't receive frame (stream end?). Exiting ...")
+                    st.write("Can't receive frame (stream end?). Exiting ...")
+                    break
+
+                video = process(frame)
+                image = cv.cvtColor(video, cv.COLOR_BGR2RGB)
+                result.image(image)
