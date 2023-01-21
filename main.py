@@ -164,15 +164,15 @@ if choice_s == "Home":
 
     with col1:
         st.header("မင်္ဂလာပါ")
-        st.image("main_page_videos/hello.mp4")
+        st.video("main_page_videos/3.mp4")
 
     with col2:
         st.header("မှန်")
-        st.image("main_page_videos/like.mp4")
+        st.video("main_page_videos/2.mp4")
 
     with col3:
         st.header("မှား")
-        st.image("main_page_videos/dislike.mp4")
+        st.video("main_page_videos/1.mp4")
 
 
 
