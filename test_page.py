@@ -7,7 +7,6 @@ import av
 import mediapipe as mp
 import os
 import tempfile
-from cvzone.HandTrackingModule import HandDetector
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from glob import glob
 from tensorflow.keras.models import load_model
@@ -16,14 +15,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 mp_hands = mp.solutions.hands
 
-detector = HandDetector(detectionCon=0.8, maxHands=2)
-
-offset = 50
-size = (300, 300)
-hand_features = []
-
 model = load_model('models for streamlit/action_yangon_100acc_100val')
-
 
 def add_bg_from_local(image_file):
     with open(image_file, "rb") as image_file:
@@ -53,7 +45,35 @@ sentence = []
 predictions = []
 threshold = 0.5
 
-def process(image,sequence=[],sentence=[],predictions=[],thereshold = 0.5):
+
+def mediapipe_detection(image,hands):
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
+    image.flags.writeable = False  # Image is no longer writeable
+    results = hands.process(image)  # Make prediction
+    image.flags.writeable = True  # Image is now writeable
+    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)  # COLOR COVERSION RGB 2 BGR
+    return image, results
+
+
+def draw_landmarks(image, results):
+    for hand_landmarks in results.multi_hand_landmarks:
+        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+        mp_drawing_styles.get_default_hand_landmarks_style(), mp_drawing_styles.get_default_hand_connections_style())
+
+        
+def extract_keypoints(results):
+    keypoints = []
+    if results.multi_hand_landmarks:
+        for h_lmk in results.multi_hand_landmarks[0].landmark:
+            keypoints.append(np.array([h_lmk.x, h_lmk.y, h_lmk.z]))
+    else:
+        keypoints.append(np.zeros(21 * 3))
+
+    keypoints = np.array(keypoints).flatten()
+    return keypoints
+
+
+def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
     with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
 
         words = np.array(['hello', 'like', 'dislike'])
@@ -90,34 +110,8 @@ def process(image,sequence=[],sentence=[],predictions=[],thereshold = 0.5):
                     sentence = sentence[-5:]
 
                 # Viz probabilities
-                image = prob_viz(res, words, image, colors)
-        return image
-
-def mediapipe_detection(image,model):
-    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
-    image.flags.writeable = False  # Image is no longer writeable
-    results = model.process(image)  # Make prediction
-    image.flags.writeable = True  # Image is now writeable
-    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)  # COLOR COVERSION RGB 2 BGR
-    return image, results
-
-def draw_landmarks(image, results):
-    for hand_landmarks in results.multi_hand_landmarks:
-        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS,
-        mp_drawing_styles.get_default_hand_landmarks_style(), mp_drawing_styles.get_default_hand_connections_style())
-
-
-def extract_keypoints(results):
-    keypoints = []
-    if results.multi_hand_landmarks:
-        for h_lmk in results.multi_hand_landmarks[0].landmark:
-            keypoints.append(np.array([h_lmk.x, h_lmk.y, h_lmk.z]))
-    else:
-        keypoints.append(np.zeros(21 * 3))
-
-    keypoints = np.array(keypoints).flatten()
-    return keypoints
-
+                image = prob_viz(res, words, image_detect, colors)
+           return image
 
 colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245)]
 
@@ -131,13 +125,12 @@ def prob_viz(res, words, input_frame, colors):
 
     return output_frame
 
-class VideoProcessor:
 
+class VideoProcessor:
     def recv(self, frame):
         img = frame.to_ndarray(format="bgr24")
 
         img = process(img)
-
 
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
