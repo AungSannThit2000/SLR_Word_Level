@@ -32,11 +32,26 @@ def add_bg_from_local(image_file):
 
 
 add_bg_from_local('bg_5hands.jpg')
+streamlit_style = """
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
+            html, body, [class*="css"]  {
+            font-family: 'Roboto', sans-serif;
+            }
+            </style>
+            """
+st.markdown(streamlit_style, unsafe_allow_html=True)
 
-st.header(':gray[_Welcome to NyoKi Classifier_]')
+original_title = '<p style="font-family:Optima; color:Orange; font-size: 40px;text-align:left top">Welcome to NyoKi Classifier</p>'
+st.markdown(original_title, unsafe_allow_html=True)
+#st.header(':gray[_Welcome to NyoKi Classifier_]')
 #st.subheader('Hand Sign Recognition Application (Word Level)')
-activities = ["Home", "Webcam Hand Detection", "Thanks"]
+activities = ["Home", "Webcam Hand Detection"]
 choice_s = st.sidebar.selectbox("Select Activity <3", activities)
+
+
+
+
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 mp_hands = mp.solutions.hands
@@ -46,7 +61,7 @@ model = load_model('models for streamlit/action_yangon_100acc_100val')
 def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
     with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
 
-        words = np.array(['hello', 'like', 'dislike'])
+        words = np.array(['MingalarPar', 'Mhan', 'Mharr'])
 
         img_resize = cv.resize(image, (640, 480))
         # Make detections
@@ -129,24 +144,30 @@ class VideoProcessor:
 
 
 if choice_s == "Home":
-    html_temp_home1 = """<div style="background-color:#454545;padding:10px">
-                              <h4 style="color:white;text-align:center;">
-                              Hand Sign recognition application (Word Level)
-                              </h4>
-                              </div>
-                              </br>"""
+    html_temp_home1 = """<div style="width:550px;height:100px;background-color:#FFFFFF;background-position:center;padding:10px">
+                                  <h4 style="color:black;text-align:center;">
+                                  Hand Sign (word level) recognition application<br>using OpenCV, Streamlit.
+                                  </h4>
+                                  </div>
+                                  </br>"""
     st.markdown(html_temp_home1, unsafe_allow_html=True)
+    # WhyWeMakeThisProject
+    original_subheader = '<p style="color:LightSteelBlue; font-size: 30px;">Why we make this project!</p>'
+    st.markdown(original_subheader, unsafe_allow_html=True)
+    # MotivationText
+    motivation_text = """<p style="color:SkyBlue;"><b>In reality, everyone is not perfect and unfortunately, some are even born with disabilities. Their lives are unfair from the start of their chapter. Realizing that, we got the idea of creating an app for the deaf people so that they can equally
+         enjoy their social lives alongside everyone else around the world.</b></p>
+        """
+    st.markdown(motivation_text, unsafe_allow_html=True)
 
-    st.subheader("Why we made this project!")
-    motivation_text = """<p><b>In reality, everyone is not perfect and unfortunately, some are even born with disabilities. Their lives are unfair from the start of their chapter. Realizing that, we got the idea of creating an app for the deaf people so that they can equally
-     enjoy their social lives alongside everyone else around the world.</b></p>
-    """
-    st.markdown(motivation_text,unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
 
 
 elif choice_s == "Webcam Hand Detection":
+    webcam_subheader = '<p style="font-family:Monospace; color:SkyBlue; font-size: 15px;">1st - Choose your webcam device.<br>2nd - Press start to begin hand detection.</p>'
+    st.markdown(webcam_subheader, unsafe_allow_html=True)
+    webcam_secondheader = '<p style="font-family:Monospace; color:LightSteelBlue; font-size: 10px;">Exception : It will take one or two seconds before it starts detection.</p>'
+    st.markdown(webcam_secondheader, unsafe_allow_html=True)
     RTC_CONFIGURATION = RTCConfiguration(
         {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
     )
