@@ -160,6 +160,20 @@ if choice_s == "Home":
         """
     st.markdown(motivation_text, unsafe_allow_html=True)
 
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.header("မင်္ဂလာပါ")
+        st.image("main_page_videos/hello.mp4")
+
+    with col2:
+        st.header("မှန်")
+        st.image("main_page_videos/like.mp4")
+
+    with col3:
+        st.header("မှား")
+        st.image("main_page_videos/dislike.mp4")
+
 
 
 
