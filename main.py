@@ -10,12 +10,9 @@ import tempfile
 from cvzone.HandTrackingModule import HandDetector
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 from glob import glob
+from tensorflow.keras.models import load_model
 
-detector = HandDetector(detectionCon=0.8, maxHands=2)
 
-offset = 50
-size = (300, 300)
-hand_features = []
 
 
 def add_bg_from_local(image_file):
@@ -38,20 +35,89 @@ add_bg_from_local('bg_5hands.jpg')
 
 st.header(':gray[_Welcome to NyoKi Classifier_]')
 #st.subheader('Hand Sign Recognition Application (Word Level)')
-activities = ["Home", "Webcam Hand Detection", "Video File Hand Detection", "Thanks"]
+activities = ["Home", "Webcam Hand Detection", "Thanks"]
 choice_s = st.sidebar.selectbox("Select Activity <3", activities)
+mp_drawing_styles = mp.solutions.drawing_styles
+mp_drawing = mp.solutions.drawing_utils # Drawing utilities
+mp_hands = mp.solutions.hands
+
+model = load_model('models for streamlit/action_yangon_100acc_100val')
+
+def process(image,sequence=[], sentence=[], predictions=[], thereshold = 0.5):
+    with mp_hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5) as hands:
+
+        words = np.array(['hello', 'like', 'dislike'])
+
+        img_resize = cv.resize(image, (640, 480))
+        # Make detections
+        image_detect, results = mediapipe_detection(img_resize, hands)
+
+        if results.multi_hand_landmarks:
+            # Draw landmarks
+            draw_landmarks(image_detect, results)
+
+            # 2. Prediction logic
+            keypoints = extract_keypoints(results)
+            sequence.append(keypoints)
+            sequence = sequence[-90:]
+
+            if len(sequence) == 90:
+                res = model.predict(np.expand_dims(sequence, axis=0))[0]
+                #             print(words[np.argmax(res)])
+                predictions.append(np.argmax(res))
+
+                # 3. Viz logic
+                if np.unique(predictions[-10:])[0] == np.argmax(res):
+                    if res[np.argmax(res)] > thereshold:
+
+                        if len(sentence) > 0:
+                            if words[np.argmax(res)] != sentence[-1]:
+                                sentence.append(words[np.argmax(res)])
+                        else:
+                            sentence.append(words[np.argmax(res)])
+
+                if len(sentence) > 5:
+                    sentence = sentence[-5:]
+
+                # Viz probabilities
+                image = prob_viz(res, words, image_detect, colors)
+        return image
 
 
-def process(image):
-    hands_crop, image_crop = detector.findHands(image)
-    if hands_crop:
-        hand_crop = hands_crop[0]
-        x, y, w, h = hand_crop['bbox']
-        img_crop = image[y - offset: y + h + offset, x - offset: x + w + offset]
+colors = [(245, 117, 16), (117, 245, 16), (16, 117, 245)]
 
-    # cv2.imshow("Original Image", image_crop)
-    return image_crop
+def mediapipe_detection(image,hands):
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)  # COLOR CONVERSION BGR 2 RGB
+    image.flags.writeable = False  # Image is no longer writeable
+    results = hands.process(image)  # Make prediction
+    image.flags.writeable = True  # Image is now writeable
+    image = cv.cvtColor(image, cv.COLOR_RGB2BGR)  # COLOR COVERSION RGB 2 BGR
+    return image, results
 
+def prob_viz(res, words, input_frame, colors):
+    output_frame = input_frame.copy()
+    for num, prob in enumerate(res):
+        cv.rectangle(output_frame, (0, 60 + num * 40), (int(prob * 100), 90 + num * 40), colors[num], -1)
+        cv.putText(output_frame, words[num], (0, 85 + num * 40), cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+                   cv.LINE_AA)
+
+    return output_frame
+
+def extract_keypoints(results):
+    keypoints = []
+    if results.multi_hand_landmarks:
+        for h_lmk in results.multi_hand_landmarks[0].landmark:
+            keypoints.append(np.array([h_lmk.x, h_lmk.y, h_lmk.z]))
+    else:
+        keypoints.append(np.zeros(21 * 3))
+
+    keypoints = np.array(keypoints).flatten()
+    return keypoints
+
+def draw_landmarks(image, results):
+    for hand_landmarks in results.multi_hand_landmarks:
+        mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS,
+        mp_drawing_styles.get_default_hand_landmarks_style(), mp_drawing_styles.get_default_hand_connections_style())
 
 class VideoProcessor:
     def recv(self, frame):
@@ -79,27 +145,6 @@ if choice_s == "Home":
 
     col1, col2, col3 = st.columns(3)
 
-    with col1:
-        st.header("မင်္ဂလာပါ")
-        video_file = open('main_page_videos/vid1.mp4', 'rb')
-        video_bytes = video_file.read()
-
-        st.video(video_bytes)
-
-    with col2:
-        st.header("မှန်တယ်")
-        video_file = open('main_page_videos/vid2.mp4', 'rb')
-        video_bytes = video_file.read()
-
-        st.video(video_bytes)
-
-    with col3:
-        st.header("မှားတယ်")
-        video_file = open('main_page_videos/vid3.mp4', 'rb')
-        video_bytes = video_file.read()
-
-        st.video(video_bytes)
-
 
 elif choice_s == "Webcam Hand Detection":
     RTC_CONFIGURATION = RTCConfiguration(
@@ -114,25 +159,3 @@ elif choice_s == "Webcam Hand Detection":
         async_processing=True,
     )
 
-elif choice_s == "Video File Hand Detection":
-    uploaded_files = st.file_uploader("Choose a video file.", accept_multiple_files=True)
-    for uploaded_file in uploaded_files:
-        if uploaded_file is not None:
-            # bytes_data = upload_file.getvalue()
-            # st.write(bytes_data)
-
-            tfile = tempfile.NamedTemporaryFile(delete=False)
-            tfile.write(uploaded_file.read())
-            vf = cv.VideoCapture(tfile.name)
-            result = st.empty()
-            while vf.isOpened():
-                ret, frame = vf.read()
-
-                if not ret:
-                    # print("Can't receive frame (stream end?). Exiting ...")
-                    st.write("Can't receive frame (stream end?). Exiting ...")
-                    break
-
-                video = process(frame)
-                image = cv.cvtColor(video, cv.COLOR_BGR2RGB)
-                result.image(image)
